@@ -1,0 +1,90 @@
+<todo-card>
+
+  <div class="uk-card uk-card-default uk-card-body todo-card">
+    <div if={props.todo.complete} class="uk-card-badge uk-label">Complete</div>
+    <h3 if={!state.editTitle}
+        class="uk-card-title"
+        onclick={ onTitleClick }>{props.todo.title}
+    </h3>
+    <div class="uk-margin">
+      <input if={state.editTitle}
+             class="uk-input uk-form-success uk-form-width-medium"
+             type="text"
+             value={props.todo.title}
+             onblur={onChangeTitle}>
+    </div>
+    <div>
+      <p class="uk-margin">
+        <button if={!props.todo.complete}
+                class="uk-button uk-button-primary"
+                onclick="{onChangeCompleteClick}">Mark As Complete
+        </button>
+        <button if={props.todo.complete}
+                class="uk-button uk-button-secondary"
+                onclick="{onChangeCompleteClick}">Mark As Incomplete
+        </button>
+        <button class="uk-button uk-button-danger"
+                onclick="{onDeleteClick}">Delete
+        </button>
+      </p>
+    </div>
+  </div>
+
+  <script type="ts">
+    import {RiotComponentExport} from 'riot';
+    import {TodoModel} from '../../server/models/todo-model';
+
+    interface Props {
+      todo: TodoModel;
+      onDelete: (id: string) => void;
+      onChangeTodo: (model: TodoModel) => void;
+    }
+
+    interface State {
+      editTitle: boolean;
+    }
+
+    interface TodoCard extends RiotComponentExport<Props, State> {
+      state: State;
+    }
+
+    function build(): TodoCard {
+      return {
+        state: {
+          editTitle: false
+        },
+        onTitleClick(): void {
+          this.state.editTitle = true;
+          this.update();
+        },
+        onChangeTitle(event: InputEvent): void {
+          const newTitle = (event.target as HTMLInputElement).value;
+          this.state.editTitle = false;
+          if (newTitle && newTitle !== this.props.todo.title) {
+            this.props.todo.title = newTitle;
+            this.props.onChangeTodo(this.props.todo);
+          } else if (newTitle) {
+            this.update();
+          }
+        },
+        onDeleteClick(): void {
+          this.props.onDelete(this.props.todo.id);
+        },
+        onChangeCompleteClick(): void {
+          this.props.todo.complete = !this.props.todo.complete;
+          this.props.onChangeTodo(this.props.todo);
+        }
+      };
+    }
+
+    export default build;
+  </script>
+
+
+  <style type="scss">
+    :host {
+      display: block;
+    }
+  </style>
+
+</todo-card>

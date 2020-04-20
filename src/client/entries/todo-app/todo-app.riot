@@ -1,0 +1,122 @@
+<todo-app>
+
+  <h1 class="uk-heading-line uk-text-center"><span>Unthink Todo</span></h1>
+  <div class="uk-section">
+    <div class="uk-container">
+      <div class="uk-margin">
+        <input class="uk-input uk-form-width-medium"
+               type="text"
+               placeholder="Add new"
+               onchange="{ onAddNewChange }"
+               value={ state.addNew }>
+        <button disabled={!state.addNew}
+                class="uk-button uk-button-primary"
+                onclick="{ onAddNewClick }">Add
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="uk-section">
+    <div class="uk-container">
+      <div class="uk-grid-match uk-child-width-1-3@m" uk-grid>
+        <div each={item in state.todos} class="todo-card">
+          <todo-card todo={item}
+                     on-delete={ onDeleteClick }
+                     on-change-todo={ onChangeTodo }/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <script type="ts">
+    import {RiotComponentExport} from 'riot';
+    import {getTodos, addTodo, deleteTodo, updateTodo} from '../../api/todos';
+    import {TodoModel} from '../../../server/models/todo-model';
+    import TodoCard from '../../components/todo-card.riot';
+
+    interface State {
+      todos: TodoModel[];
+      addNew: string;
+    }
+
+    interface TodoApp extends RiotComponentExport<never, State> {
+      state: State;
+    }
+
+    function build(): TodoApp {
+      return {
+        state: {
+          todos: [],
+          addNew: ''
+        },
+        onBeforeMount(): void {
+          this.getTodos().then(() => {
+            this.update();
+          });
+        },
+        onAddNewChange(event: InputEvent): void {
+          this.update({
+            addNew: (event.target as HTMLInputElement).value
+          });
+
+          console.log(this.state.addNew);
+        },
+        onAddNewClick(): void {
+          this.addTodo().then(() => {
+            this.getTodos().then(() => {
+              this.update({
+                addNew: null
+              });
+            });
+          });
+        },
+        onDeleteClick(id: string): void {
+          this.deleteTodo(id).then(() => {
+            this.getTodos();
+          });
+        },
+        onChangeTodo(model: TodoModel): void {
+          this.updateTodo(model).then(() => {
+            this.update();
+          });
+        },
+        async getTodos(): Promise<void> {
+          const todos = await getTodos();
+          this.update({
+            todos: todos
+          });
+        },
+        async addTodo(): Promise<void> {
+          await addTodo(new TodoModel({
+            title: this.state.addNew
+          }));
+        },
+        async deleteTodo(id: string): Promise<void> {
+          await deleteTodo(id);
+        },
+        async updateTodo(model: TodoModel): Promise<void> {
+          await updateTodo(model);
+        }
+      };
+    }
+
+    build.components = {
+      TodoCard
+    };
+
+    export default build;
+  </script>
+
+  <style type="scss">
+    :host {
+      display: block;
+    }
+    .todo-card {
+      margin-bottom: 2rem;
+    }
+  </style>
+</todo-app>
