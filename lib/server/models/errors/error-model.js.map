@@ -1,1 +1,0 @@
-{"version":3,"file":"error-model.js","sourceRoot":"","sources":["../../../../src/server/models/errors/error-model.ts"],"names":[],"mappings":";;AAAA,2DAAmD;AAEnD,MAAa,UAAW,SAAQ,kCAAa;IAG3C,YAAY,IAAY,EAAE,GAAW;QACnC,KAAK,CAAC,GAAG,CAAC,CAAC;QACX,IAAI,CAAC,IAAI,GAAG,IAAI,CAAC;IACnB,CAAC;CACF;AAPD,gCAOC"}
